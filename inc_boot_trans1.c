@@ -10,23 +10,20 @@ class(mod_main_Counter, mbrs(
     mbr(_count, uint32)
 ))
 
-fn(mod_main_main, (), void, {
-     asn(anon_return, new(mod_main_Counter, {litrl_uint32(8)}), uint32)
-})
+// fn(mod_mian_inc_counter, (mod_main_Counter counter), uint32, {
+// })
 
-fn(main, (), uint32, {
-    dec(foo, mod_main_Counter)
-    asn(foo, new(mod_main_Counter, {
-        litrl(uint32, 6)
-    }), mod_main_Counter)
+fn(main, uint32,
+    args(  ),
+    locals( lcl(foo, mod_main_Counter), lcl(foombr, uint32) ),
+    frame(
+        asn(foo, mod_main_Counter, new(mod_main_Counter, {litrl(uint32, 6)}))
 
-    dec(foombr, uint32)
-    asn(foombr, getmbr(foo, mod_main_Counter, _count, uint32), uint32)
-    dbg_print_refcount(foo, mod_main_Counter)
-    rel(foo, mod_main_Counter)
-    dbg_print_refcount(foo, mod_main_Counter)
-    ret(foombr, uint32)
-})
+        asn(foombr, uint32, getmbr(foo, mod_main_Counter, _count, uint32))
+        dbg_print_refcount(foo, mod_main_Counter)
+        ret(get(foombr, uint32), uint32)
+    )
+)
 
 int main(void) {
     call(main, ());

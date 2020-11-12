@@ -1987,36 +1987,29 @@ void rel_mod_main_Counter(mod_main_Counter self) {
 mod_main_Counter dec_dflt_mod_main_Counter() { return ((void *)0); }
 mod_main_Counter ret_mod_main_Counter(mod_main_Counter self) { return self; }
 
-void fn_mod_main_main() {
-  tmp_asn_anon_return = var_anon_return;
-  var_anon_return =
-      new_mod_main_Counter((content_mod_main_Counter){litrl_uint32(8)});
-  rel_uint32(tmp_asn_anon_return);
-}
-
-uint32 fn_main() {
+uint32 fn_main(void) {
   mod_main_Counter var_foo = dec_dflt_mod_main_Counter();
-  mod_main_Counter tmp_asn_foo;
-  tmp_asn_foo = var_foo;
-  var_foo = new_mod_main_Counter((content_mod_main_Counter){litrl_uint32(6)});
-  rel_mod_main_Counter(tmp_asn_foo);
   uint32 var_foombr = dec_dflt_uint32();
+  mod_main_Counter tmp_asn_foo;
   uint32 tmp_asn_foombr;
+  tmp_asn_foo = var_foo;
+  var_foo = mod_main_Counter;
+  rel_new(mod_main_Counter, {litrl_uint32(6)})(tmp_asn_foo);
   tmp_asn_foombr = var_foombr;
-  var_foombr = get_uint32(contentof_mod_main_Counter(var_foo).mbr__count);
-  rel_uint32(tmp_asn_foombr);
+  var_foombr = uint32;
+  rel_getmbr(foo, mod_main_Counter, _count, uint32)(tmp_asn_foombr);
   printf("`"
          "foo"
          "`'s ref count = %llu\n",
          var_foo->rc);
+  uint32 _return_tmp_ = get_uint32(var_foombr);
+  goto fn_return_label;
+fn_return_label:
   rel_mod_main_Counter(var_foo);
-  printf("`"
-         "foo"
-         "`'s ref count = %llu\n",
-         var_foo->rc);
-  return ret_uint32(var_foombr);
+  rel_uint32(var_foombr);
+  return _return_tmp_;
 }
-# 31 "inc_boot_trans1.c"
+# 27 "inc_boot_trans1.c"
 int main(void) {
   fn_main();
   return 0;
