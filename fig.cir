@@ -1,0 +1,94 @@
+
+decl sct mod.main.Point {
+    mbr x: sct bltn.uint32
+    mbr y: sct bltn.uint32
+} /* auto gens asn del new mov etc */
+
+
+decl fn mod.main.Point.__new__(
+    arg.x: sct bltn.uint32
+    arg.y: sct bltn.uint32
+) -> sct mod.main.Point [
+    asn lcl.x: sct bltn.uint32 = get arg.x /* break lines are not required */
+    asn lcl.y: sct bltn.uint32 = get arg.y /* but they are suggested */
+    asn anon.return: sct mod.main.Point = new sct mod.main.Point(
+        get lcl.x get lcl.y
+    )
+    ret get anon.return
+]
+
+decl fn mod.main.point.__init__..bltn.int64 (
+    arg.x_raw: sct int64 arg.y_raw: sct int64
+) -> sct mod.main.Point [
+    asn lcl.x_raw: sct int64 = get arg.x_raw
+    asn lcl.y_raw: sct int64 = get arg.y_raw
+
+    asn anon.lit.0: sct bltn.int64 = litrl(0)
+    asn anon.lit.1: sct bltn.int64 = litrl(`2**32`)
+
+    asn anon.cond.0: sct bltn.bool  = call fn bltn.int64.__lt__(
+        get lcl.x get anon.lit.0
+    )
+        /* can do `if get anon.cond.0 []` */
+    if call fn ..sct..bltn.bool..to..prim.bool(
+        get anon.cond.0
+    ) [
+        asn lcl.x_raw: sct bltn.int64 = call fn bltn.int64.__add__ (get lcl.x_raw get anon.lit.1)
+    ]
+
+    asn anon.cond.1: sct bltn.bool = call fn bltn.int64.__lt__(
+        get lcl.y get anon.lit.0
+    )
+
+    if call fn ..sct..bltn.bool..to..prim.bool(get anon.cond.1) [
+        asn lcl.y_raw: sct bltn.int64 = call fn bltn.int64.__add__ (
+            get lcl.y_raw get anon.lit.1
+        )
+    ]
+
+    asn anon.ref.0: sct bltn.Option..uint32  = call fn bltn.uint32.from..int64(
+        get lcl.x_raw
+    )
+    asn lcl.x: sct bltn.uint32  = call fn bltn.Option.unwrap..uint32(
+        get anon.ref.0
+    )
+
+    asn anon.ref.1: sct bltn.Option..uint32  = call fn bltn.uint32.from..int64(
+        get lcl.y_raw
+    )
+    asn lcl.y: sct bltn.uint32  = call fn bltn.Option.unwrap..uint32(get anon.ref.1)
+
+    asn anon.return: sct mod.main.Point = call fn mod.main.Point.__new__(
+        get lcl.x lcl.y
+    )
+
+    ret get anon.return
+]
+
+decl cls Counter {
+    mbr _count: sct bltn.uint64
+}
+
+decl fn mod.main.Counter.__new__(arg._count: sct bltn.uint64) -> cls mod.main.Counter[
+    asn lcl._count: sct bltn.uint64 = get arg._count
+    asn anon.return: cls mod.main.Counter = new cls mod.main.Counter(get lcl._count)
+    ret get anon.return
+]
+
+decl fn mod.main.Counter.__init__() -> cls mod.mian.Counter[
+    asn anon.lit.0: sct bltn.uint64 = litrl(0)
+    asn anon.return: cls mod.main.Counter = call fn mod.main.Counter.__new__(get anon.lit.0)
+    ret get anon.return
+]
+
+decl fn mod.main.Counter.count(cls mod.main.Counter self) -> sct bltn.uint64[
+    dec anon.return : sct bltn.uint64 
+    asn anon.return = get self mbr cls mod.main.Counter
+    ret
+]
+
+/*
+decl fn mod.main.Counter.inc (self: mod.main.Counter) -> bltn.Nothing [
+
+]
+*/
