@@ -1,17 +1,26 @@
 #include "cir_macros.h"
 #include "cir_builtins.h"
 
+// struct Point:
+//     x: uint32
+//     y: uint32
+
 struct(mod_main_Point, mbrs(
     mbr(x, uint32),
     mbr(y, uint32),
 ))
 
+// class Counter:
+//     _count: uint32
+
 class(mod_main_Counter, mbrs(
     mbr(_count, uint32)
 ))
 
-// fn(mod_mian_inc_counter, (mod_main_Counter counter), uint32, {
-// })
+// def main () -> uint32:
+//     foo = Counter{_count:6u32}
+//     foombr = foo._count
+//     return foombr
 
 fn(main, uint32,
     args(  ),
@@ -21,9 +30,11 @@ fn(main, uint32,
 
         asn(foombr, uint32, getmbr(foo, mod_main_Counter, _count, uint32))
         dbg_print_refcount(foo, mod_main_Counter)
-        ret(get(foombr, uint32), uint32)
+        ret(uint32, get(foombr, uint32))
     )
 )
+
+// language internal:
 
 int main(void) {
     call(main, ());

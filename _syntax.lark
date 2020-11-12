@@ -1,0 +1,75 @@
+start: decl+
+
+decl: "decl" (func_def | sct_def | cls_def)
+
+type: cls_type | sct_type | prim_type
+cls_type: "cls" name
+sct_type: "sct" name
+prim_type: "prim" word
+
+list{val, sep}: val (sep val)* sep?
+
+func_def: "fn" name "(" func_param* ")" "->" type frame
+func_param: name ":" type
+
+sct_def: "sct" name type_def_body
+cls_def: "cls" name type_def_body
+type_def_body: "{" mbr_def* "}"
+mbr_def: "mbr" word ":" type
+
+frame: "[" stmt* "]"
+
+stmt: ret_stmt      | del_stmt
+    | asn_stmt      | asn_mbr_stmt
+    | if_stmt
+    | loop_stmt     | break_stmt    | cont_stmt
+    | inc_stmt      | dropin_stmt
+
+
+ret_stmt: "ret" get_expr
+
+asn_stmt: "asn" name ":" type "=" expr
+asn_mbr_stmt: "asn" name "mbr" word ":" type "="expr
+
+if_stmt: "if" expr frame ("else" frame)?
+
+loop_stmt: "loop" frame
+break_stmt: "break"
+cont_stmt: "cont"
+// for internal use?
+inc_stmt: "inc" name
+del_stmt: "del" name
+
+dropin_stmt: "dropin" "(" SINGLE_DROPIN | MULTI_DROPIN ")"
+
+// all expressions return an object
+//  (w/out  a reference, meaning need asignment or pass on)
+expr: get_expr | call_expr | new_expr | litrl_expr
+//| get_mbr_expr
+
+get_expr: "get" name // var expr perform the copy and/or reference from local vars
+new_expr: "new" type "(" expr* ")"
+litrl_expr: "litrl" "(" (STRING | LONGSTRING | FLOAT | INT | WORD | SINGLE_DROPIN) ")"
+
+call_expr: "call" _call_fn_expr //| _call_ptr_expr
+_call_fn_expr: "fn" name "(" expr* ")"
+// _call_ptr_expr: "ptr" name
+
+
+COMMENT: /\/\*([^*]|[\r\n]|(\*+([^*\/]|[\r\n])))*\*+\//
+STRING: /("(?!"").*?(?<!\\)(\\\\)*?"|'(?!'').*?(?<!\\)(\\\\)*?')/i
+LONGSTRING: /(""".*?(?<!\\)(\\\\)*?"""|'''.*?(?<!\\)(\\\\)*?''')/is
+FLOAT: /((\d+\.\d*|\.\d+)(e[-+]?\d+)?|\d+(e[-+]?\d+))/i
+INT: /[0-9]+/i
+
+SINGLE_DROPIN: ("`" /[^`\n]+/ "`")
+MULTI_DROPIN: ("```" /[^`]+/ "```")
+
+DOT: "."
+WORD: /(\.\.)?[_a-zA-Z][_a-zA-Z0-9]*/
+
+name: (DOT | WORD) (DOT | WORD | INT | FLOAT)*
+word: WORD
+
+%ignore COMMENT
+%ignore /[ \n\t]+/  // white psace

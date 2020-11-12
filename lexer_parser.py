@@ -18,7 +18,7 @@ def Token__repr__(self):
 Token.__repr__ = Token__repr__
 ### hot patch lark tree and token repr
 
-_parser = Lark.open('syntax.lark',
+_parser = Lark.open('levir_syntax.lark',
     #parser='earley',
     rel_to=__file__,
     #ambiguity='resolve'
@@ -29,7 +29,7 @@ def parse_str(string):
     global _parser
     return _parser.parse(string)
 
-with open('fig.cir') as file:
+with open('basic.levir') as file:
     print(
         parse_str(file.read())
             .pretty()

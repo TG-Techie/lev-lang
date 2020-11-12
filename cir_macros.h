@@ -77,8 +77,8 @@ getmbr: #this is a macro : getmbr_<name>() -> type(Member)
     struct_ret_def(typename, members)\
 
 // expressions
-#define get(value, type)\
-    get_##type(var_##value)
+#define get(name, type)\
+    get_##type(var_##name)
 
 #define call(fnname, args)\
     fn_##fnname args
@@ -112,7 +112,8 @@ getmbr: #this is a macro : getmbr_<name>() -> type(Member)
     var_##name = value; \
     rel_##type(tmp_asn_##name);\
 
-#define ret(value, type) type _return_tmp_ = value; goto fn_return_label;
+#define ret(type, value) \
+    type _return_tmp_ = value; goto fn_return_label;
 // #define ret(value, type)\
 //     return ret_##type(var_##value);
 
@@ -121,8 +122,8 @@ getmbr: #this is a macro : getmbr_<name>() -> type(Member)
 #define cont continue;
 
 // compound statments
-#define loop(body) \
-    while (1) body;
+#define loop(...) \
+    while (1) { __VA_ARGS__ };
 /* usage:
     loop({
         code here ...

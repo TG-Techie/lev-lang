@@ -1,0 +1,65 @@
+start: item+
+
+item: classdef | structdef | fndef
+
+list{val, sep}: val (sep val)* sep?
+
+classdef: "class("  typename "," mbrs ")"
+classdef: "struct(" typename "," mbrs ")"
+
+mbrs: "mbrs(" list{mbr, ","} ")"
+mbr: "mbr(" name, type ")"
+
+fndef: "fn(" fnname "," rettype "," \
+    args "," locals "," frame ")"
+
+args: "args(" list{arg, ","} ")"
+arg: "arg(" name, type ")"
+
+locals: "locals(" list{lcl, ","} ")"
+lcl: "lcl(" name, type ")"
+
+frame: "(" stmt+ ")"
+
+stmt: asn_stmt | ret_stmt | brk_stmt | cont_stmt | loop_stmt | dbg_stmt
+asn_stmt: "asn(" name "," type "," expr ")"
+ret_stmt: "ret(" type "," expr ")"
+brk_stmt: "brk"
+cont_stmt: "cont"
+loop_stmt: "loop(" stmt* ")"
+
+dbg_stmt: /dbg_[A-z_0-9]\(/ c_symbol? name "," type ")"
+c_symbol: /\*\&/
+
+expr: get_expr | call_expr | getmbr_expr | new_expr | litrl_expr
+get_expr: "get(" name "," type ")"
+call_expr: "call(" fnname "," "(" list{expr, ","} ")" ")"
+//getmbr_expr: "getmbr("  ")"
+new_expr: "new(" type "," new_body ")"
+litrl_expr: "litrl(" literal ")"
+
+new_body: "{" list{expr, ","} "}"
+
+name: IDENT
+type: IDENT
+typename: IDENT
+fnname: IDENT
+rettype: IDENT
+
+literal: STRING | LONGSTRING | FLOAT | INT
+
+STRING: /("(?!"").*?(?<!\\)(\\\\)*?"|'(?!'').*?(?<!\\)(\\\\)*?')/i
+LONGSTRING: /(""".*?(?<!\\)(\\\\)*?"""|'''.*?(?<!\\)(\\\\)*?''')/is
+FLOAT: /((\d+\.\d*|\.\d+)(e[-+]?\d+)?|\d+(e[-+]?\d+))/i
+INT: /[0-9]+/i
+
+IDENT: /[_A-z][_A-z0-9]*/
+
+%ignore COMMENT
+%ignore C_MACRO
+%ignore /[ \n\t]+/
+
+C_MACRO: /#[A-z]+ (?:.*\\\r?\n)*[^\n]*\n/ // c #def or #incl macros
+COMMENT: MULTILINE_COMMENT | SINGLELINE_COMMENT
+MULTILINE_COMMENT: /\/\/[^\n]*/ // single line c comment
+SINGLELINE_COMMENT: /\/\*[\s\S]*?\*\// // multi line c comment
