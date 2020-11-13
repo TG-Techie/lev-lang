@@ -1,3 +1,4 @@
+#include "cir_mbrof_macro.h"
 
 struct(SctC, mbrs(
     mbr(num, uint32)
@@ -11,7 +12,6 @@ struct(SctA, mbrs(
     mbr(foo, SctB)
 ))
 
-
 fn(main, uint32,
     args(),
     locals(lcl(sct_outer, SctA)),
@@ -21,16 +21,60 @@ fn(main, uint32,
                 new(SctC, {litrl(uint32, 88)})
             })
         }))
+        "!!!!!!!!!!!!!!!!!!!!!!!";
 
-        dbg( printf("%d\n", (
+                 // // SctA tmp_mbrof_sct_outer = getvar(sct_outer, SctA);
+        printf("%d\n",
+             (
                 content_ptr_SctC(
                     &(content_ptr_SctB(
-                        &(content_ptr_SctA(&var_sct_outer)->mbr_foo)
+                        &(content_ptr_SctA(&(var_sct_outer))->mbr_foo)
                     )->mbr_bar)
                 )->mbr_num
             ).native
-        ))
+        );
 
+        mbrof(sct_outer, SctA, mbrs(
+                mbr(foo, SctB),
+                mbr(bar, SctC),
+                mbr(num, uint32)
+            )
+        ) = litrl(uint32, 97);
+        "!!!!!!!!!!!";
+        printf("%d\n",
+             (
+                mbrof(sct_outer, SctA, mbrs(
+                        mbr(foo, SctB),
+                        mbr(bar, SctC),
+                        mbr(num, uint32)
+                    )
+                )
+            ).native
+        );
+        "+++++++++++++";
+        // strip_trailing(
+        //     mbr(foo, SctB),
+        //     mbr(bar, SctC),
+        //     mbr(num, uint32)
+        // );
+        // strip_trailing(
+        //     mbr(foo, SctB),
+        //     mbr(bar, SctC),
+        //     mbr(num, uint32),
+        // );
+        "!!!!!!!!!!!!!!!!!!!!!!!";
         ret(uint32, litrl(uint32, 1))
     )
 )
+
+/*  ;
+  "!!!!!!!!!!!";
+  _call_chain_4_from_3(
+      _link_3(
+          content_ptr_SctB(&(
+              content_ptr_SctA(&(
+                  var_sct_outer
+              ))->mbr_bar
+          ))->mbr_num,
+      uint32 )
+  );*/

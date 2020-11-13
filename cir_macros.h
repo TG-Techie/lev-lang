@@ -103,16 +103,16 @@ getmbr: #this is a macro : getmbr_<name>() -> type(Member)
 // dec and rel are retired since locals/args were introduced to fn syntax
 // #define dec(name, type) \
 //     type var_##name = dec_dflt_##type();\
-//     type tmp_asn_##name;\
+//     type tmp_asnvar_##name;\
 //
 //
 // #define rel(value, type) \
 //     rel_##type(var_##value);
 
 #define asnvar(varname, type, value) \
-    tmp_asn_##varname = var_##varname; \
+    tmp_asnvar_##varname = var_##varname; \
     var_##varname = value; \
-    rel_##type(tmp_asn_##varname);\
+    rel_##type(tmp_asnvar_##varname);\
 
 // #define asnmbr(mbrname, mbrtype, varname, vartype, expr) \
 //     rel_##mbrtype(expose_mbrs_##vartype(\
@@ -187,7 +187,9 @@ getmbr: #this is a macro : getmbr_<name>() -> type(Member)
 #define VARNT_IMPL_arg_to_dec_tmp_
 #define VARNT_IMPL_arg_to_dec_tmp_arg VARNT_IMPL_arg_to_dec_tmp_any
 #define VARNT_IMPL_arg_to_dec_tmp_lcl VARNT_IMPL_arg_to_dec_tmp_any
-#define VARNT_IMPL_arg_to_dec_tmp_any(name, type) type tmp_asn_##name;
+#define VARNT_IMPL_arg_to_dec_tmp_any(name, type) \
+    type tmp_asnvar_##name; \
+    type tmp_mbrof_##name; \
 
 #define _dec_dflt_from_locals(...)\
     VARAD_VARNT_MACRO(lcl_to_dec_deflt_, __VA_ARGS__)

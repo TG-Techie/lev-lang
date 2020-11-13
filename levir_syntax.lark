@@ -4,7 +4,7 @@ start: item+
 
 item: classdef | structdef | fndef
 
-list{val, sep}: val (sep val)* sep?
+list{val, sep}: val (sep val)*
 
 classdef: "class" "("  typename "," mbrs ")"
 structdef: "struct" "(" typename "," mbrs ")"
@@ -25,7 +25,7 @@ frame: "frame" "(" stmt+ ")"
 stmt: asnvar_stmt   | asnmbr_stmt   | ret_stmt  | brk_stmt
     | cont_stmt     | loop_stmt     | dbg_stmt
 asnvar_stmt: "asnvar" "(" varname "," type "," expr ")"
-asnmbr_stmt: "asnmbr" "(" mbrname "," mbrtype "," expr "," vartype "," expr ")"
+asnmbr_stmt: "asnmbr" "(" mbrname "," mbrtype "," get_expr "," vartype "," expr ")"
 
 ret_stmt: "ret" "(" type "," expr ")"
 brk_stmt: "brk"

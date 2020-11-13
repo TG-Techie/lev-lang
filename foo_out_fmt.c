@@ -1812,9 +1812,6 @@ typedef uint64_t RefCount;
 # 4 "./cir_builtins.h" 2
 
 # 1 "./cir_macros.h" 1
-
-# 1 "./varad_macro.h" 1
-# 4 "./cir_macros.h" 2
 # 22 "./cir_macros.h"
 typedef uint64_t RefCount;
 # 6 "./cir_builtins.h" 2
@@ -2004,26 +2001,29 @@ uint32 fn_main(void) {
   mod_main_Counter var_foo = dec_dflt_mod_main_Counter();
   uint32 var_foombr1 = dec_dflt_uint32();
   uint32 var_foombr2 = dec_dflt_uint32();
-  mod_main_Counter tmp_asn_foo;
-  uint32 tmp_asn_foombr1;
-  uint32 tmp_asn_foombr2;
-  tmp_asn_foo = var_foo;
+  mod_main_Counter tmp_asnvar_foo;
+  mod_main_Counter tmp_mbrof_foo;
+  uint32 tmp_asnvar_foombr1;
+  uint32 tmp_mbrof_foombr1;
+  uint32 tmp_asnvar_foombr2;
+  uint32 tmp_mbrof_foombr2;
+  tmp_asnvar_foo = var_foo;
   var_foo = new_mod_main_Counter((content_mod_main_Counter){litrl_uint32(6)});
-  rel_mod_main_Counter(tmp_asn_foo);
+  rel_mod_main_Counter(tmp_asnvar_foo);
   printf("1rc: %llu\n", var_foo->rc);
-  tmp_asn_foombr1 = var_foombr1;
+  tmp_asnvar_foombr1 = var_foombr1;
   var_foombr1 = get_uint32(
       expose_mbrs_mod_main_Counter(get_mod_main_Counter(var_foo)).mbr__count);
-  rel_uint32(tmp_asn_foombr1);
+  rel_uint32(tmp_asnvar_foombr1);
   printf("2rc: %llu\n", var_foo->rc);
   printf("%d\n", var_foo->content.mbr__count.native);
   printf("3rc: %llu\n", var_foo->rc);
   printf("4rc: %llu\n", var_foo->rc);
   printf("%d\n", var_foo->content.mbr__count.native);
-  tmp_asn_foombr2 = var_foombr2;
+  tmp_asnvar_foombr2 = var_foombr2;
   var_foombr2 = get_uint32(
       expose_mbrs_mod_main_Counter(get_mod_main_Counter(var_foo)).mbr__count);
-  rel_uint32(tmp_asn_foombr2);
+  rel_uint32(tmp_asnvar_foombr2);
   printf("5rc: %llu\n", var_foo->rc);
   uint32 _return_tmp_ = get_uint32(var_foombr1);
   goto fn_return_label;
