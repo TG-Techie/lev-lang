@@ -3,26 +3,20 @@
 #include "varad_macro.h"
 
 
+#define mbrof(varname, vartype, mbrs) \
+    _to_macro_call_a(_mbrof_once_stripped, var_##varname, vartype, _call_strip( _unpack_arg_##mbrs ))
+#define _mbrof_once_stripped(varname, vartype, mbrs) \
+    _to_macro_call_b(_direct_mbrof_call, varname, vartype, mbrs, num_##mbrs)
+#define _direct_mbrof_call(varname, vartype, mbrs, count) \
+    _to_macro_call_c(_mbrof_chain_##count, varname, vartype, _unpack_##mbrs)
+
 #define _to_macro_call_a(macroname, ...) macroname(__VA_ARGS__)
 #define _to_macro_call_b(macroname, ...) macroname(__VA_ARGS__)
 #define _to_macro_call_c(macroname, ...) macroname(__VA_ARGS__)
 #define _call_strip(...) strip_trailing(__VA_ARGS__)
 
-
-#define mbrof(varname, vartype, mbrs) \
-    _to_macro_call_a(_mbrof_once_stripped, varname, vartype, _call_strip( _unpack_##mbrs ))
-#define _mbrof_once_stripped(varname, vartype, mbrs) \
-    _to_macro_call_b(_direct_mbrof_call, varname, vartype, mbrs, num_##mbrs)
-#define _direct_mbrof_call(varname, vartype, mbrs, count) \
-    _to_macro_call_c(_mbrof_chain_##count, var_##varname, vartype, _unpack_##mbrs)
-        //_fmt_mbrof(var_##varname, vartype, _unpack_##mbrs)
-
-        // chain_accessed_mbrs(\
-        //     content_ptr_##vartype(&var_##varname), \
-        //     _unpack_##mbrs\
-        // )\
-
-
+#define _unpack_arg_mbrs(...) __VA_ARGS__
+#define _unpack_arg_mbr(name, type) mbr(name, type)
 
 #define _unpack_mbrs(...) __VA_ARGS__
 #define _unpack_mbr(name, type) name, type

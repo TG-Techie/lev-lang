@@ -4,15 +4,17 @@ start: item+
 
 item: classdef | structdef | fndef
 
-list{val, sep}: val (sep val)*
+list{val, sep}: val (sep val)* sep?
 
 classdef: "class" "("  typename "," mbrs ")"
 structdef: "struct" "(" typename "," mbrs ")"
 fndef: "fn" "(" fnname "," rettype "," args "," locals "," frame ")"
 
+frame: "frame" "(" stmt+ ")"
+
+// info sets
 mbrs: "mbrs" "(" list{mbr, ","} ")"
 mbr: "mbr" "(" name "," type ")"
-
 
 args: "args" "(" list{arg, ","}? ")"
 arg: "arg" "(" name "," type ")"
@@ -20,27 +22,29 @@ arg: "arg" "(" name "," type ")"
 locals: "locals" "(" list{lcl, ","}? ")"
 lcl: "lcl" "(" name "," type ")"
 
-frame: "frame" "(" stmt+ ")"
-
-stmt: asnvar_stmt   | asnmbr_stmt   | ret_stmt  | brk_stmt
+// statments
+stmt: asn_stmt      | ret_stmt      | brk_stmt
     | cont_stmt     | loop_stmt     | dbg_stmt
-asnvar_stmt: "asnvar" "(" varname "," type "," expr ")"
-asnmbr_stmt: "asnmbr" "(" mbrname "," mbrtype "," get_expr "," vartype "," expr ")"
+    | passthrough_comment
+asn_stmt: "asn" "(" subject "," expr "," type ")"
 
-ret_stmt: "ret" "(" type "," expr ")"
-brk_stmt: "brk"
+ret_stmt:  "ret" "(" expr "," type ")"
+brk_stmt:  "brk"
 cont_stmt: "cont"
 loop_stmt: "loop" "(" stmt* ")"
+
+passthrough_comment: "comment" "(" STRING ")"
 
 dbg_stmt: "dbg" "(" name ("(" list{ dbg_arg, ","} ")")? ")"
 dbg_arg:  c_symbol? (name | expr | literal) c_symbol?
 c_symbol: /\*\&/
 
-expr: getvar_expr | call_expr | getmbr_expr
+// expressions
+
+expr: get_expr | call_expr
     | new_expr | litrl_expr
 
-getvar_expr: "getvar" "(" varname "," type ")"
-getmbr_expr: "getmbr" "(" mbrname "," mbrtype "," expr "," type ")"
+get_expr: "get" "(" subject "," type ")"
 
 call_expr: "call" "(" fnname "," "(" list{expr, ","} ")" ")"
 new_expr: "new" "(" type "," new_body ")"
@@ -48,6 +52,11 @@ litrl_expr: "litrl" "(" type "," literal ")"
 
 new_body: "{" list{expr, ","} "}"
 
+subject: var_subject | mbrof_subject
+var_subject: "var" "(" varname ")"
+mbrof_subject: "mbrof" "(" varname "," vartype "," (mbr | mbrs) ")"
+
+// named idents (for clarity)
 name: IDENT
 
 type: IDENT

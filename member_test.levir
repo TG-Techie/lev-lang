@@ -1,4 +1,4 @@
-#include "cir_mbrof_macro.h"
+
 
 struct(SctC, mbrs(
     mbr(num, uint32)
@@ -16,42 +16,41 @@ fn(main, uint32,
     args(),
     locals(lcl(sct_outer, SctA)),
     frame(
-        asnvar(sct_outer, SctA, new(SctA, {
+        asn(var(sct_outer), new(SctA, {
             new(SctB, {
                 new(SctC, {litrl(uint32, 88)})
             })
-        }))
-        "!!!!!!!!!!!!!!!!!!!!!!!";
-
+        }), SctA)
+        comment("!!!!!!!!!!!!!!!!!!!!!!!")
                  // // SctA tmp_mbrof_sct_outer = getvar(sct_outer, SctA);
-        printf("%d\n",
-             (
-                content_ptr_SctC(
-                    &(content_ptr_SctB(
-                        &(content_ptr_SctA(&(var_sct_outer))->mbr_foo)
-                    )->mbr_bar)
-                )->mbr_num
-            ).native
-        );
+        // printf("%d\n",
+        //      (
+        //         content_ptr_SctC(
+        //             &(content_ptr_SctB(
+        //                 &(content_ptr_SctA(&(var_sct_outer))->mbr_foo)
+        //             )->mbr_bar)
+        //         )->mbr_num
+        //     ).native
+        // );
 
-        mbrof(sct_outer, SctA, mbrs(
+        asn(mbrof(sct_outer, SctA, mbrs(
                 mbr(foo, SctB),
                 mbr(bar, SctC),
                 mbr(num, uint32)
             )
-        ) = litrl(uint32, 97);
-        "!!!!!!!!!!!";
-        printf("%d\n",
-             (
-                mbrof(sct_outer, SctA, mbrs(
-                        mbr(foo, SctB),
-                        mbr(bar, SctC),
-                        mbr(num, uint32)
-                    )
-                )
-            ).native
-        );
-        "+++++++++++++";
+        ), litrl(uint32, 97), uint32)
+        comment("!!!!!!!!!!!")
+        // printf("%d\n",
+        //      (
+        //         mbrof(sct_outer, SctA, mbrs(
+        //                 mbr(foo, SctB),
+        //                 mbr(bar, SctC),
+        //                 mbr(num, uint32)
+        //             )
+        //         )
+        //     ).native
+        // );
+        comment("+++++++++++++")
         // strip_trailing(
         //     mbr(foo, SctB),
         //     mbr(bar, SctC),
@@ -62,8 +61,8 @@ fn(main, uint32,
         //     mbr(bar, SctC),
         //     mbr(num, uint32),
         // );
-        "!!!!!!!!!!!!!!!!!!!!!!!";
-        ret(uint32, litrl(uint32, 1))
+        comment("!!!!!!!!!!!!!!!!!!!!!!!")
+        ret(litrl(uint32, 1), uint32)
     )
 )
 
