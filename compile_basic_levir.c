@@ -3,8 +3,6 @@
 
 #include "basic.levir"
 
-// language internal:
-
 int main(void) {
     call(main, ());
     return 0;

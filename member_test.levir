@@ -1,4 +1,5 @@
 
+
 struct(SctC, mbrs(
     mbr(num, uint32)
 ))
@@ -11,26 +12,68 @@ struct(SctA, mbrs(
     mbr(foo, SctB)
 ))
 
-
 fn(main, uint32,
     args(),
     locals(lcl(sct_outer, SctA)),
     frame(
-        asnvar(sct_outer, SctA, new(SctA, {
+        asn(var(sct_outer), new(SctA, {
             new(SctB, {
                 new(SctC, {litrl(uint32, 88)})
             })
-        }))
+        }), SctA)
+        comment("!!!!!!!!!!!!!!!!!!!!!!!")
+                 // // SctA tmp_mbrof_sct_outer = getvar(sct_outer, SctA);
+        // printf("%d\n",
+        //      (
+        //         content_ptr_SctC(
+        //             &(content_ptr_SctB(
+        //                 &(content_ptr_SctA(&(var_sct_outer))->mbr_foo)
+        //             )->mbr_bar)
+        //         )->mbr_num
+        //     ).native
+        // );
 
-        dbg( printf("%d\n", (
-                content_ptr_SctC(
-                    &(content_ptr_SctB(
-                        &(content_ptr_SctA(&var_sct_outer)->mbr_foo)
-                    )->mbr_bar)
-                )->mbr_num
-            ).native
-        ))
-
-        ret(uint32, litrl(uint32, 1))
+        asn(mbrof(sct_outer, SctA, mbrs(
+                mbr(foo, SctB),
+                mbr(bar, SctC),
+                mbr(num, uint32)
+            )
+        ), litrl(uint32, 97), uint32)
+        comment("!!!!!!!!!!!")
+        // printf("%d\n",
+        //      (
+        //         mbrof(sct_outer, SctA, mbrs(
+        //                 mbr(foo, SctB),
+        //                 mbr(bar, SctC),
+        //                 mbr(num, uint32)
+        //             )
+        //         )
+        //     ).native
+        // );
+        comment("+++++++++++++")
+        // strip_trailing(
+        //     mbr(foo, SctB),
+        //     mbr(bar, SctC),
+        //     mbr(num, uint32)
+        // );
+        // strip_trailing(
+        //     mbr(foo, SctB),
+        //     mbr(bar, SctC),
+        //     mbr(num, uint32),
+        // );
+        comment("!!!!!!!!!!!!!!!!!!!!!!!")
+        ret(litrl(uint32, 1), uint32)
     )
 )
+
+/*  ;
+  "!!!!!!!!!!!";
+  _call_chain_4_from_3(
+      _link_3(
+          content_ptr_SctB(&(
+              content_ptr_SctA(&(
+                  var_sct_outer
+              ))->mbr_bar
+          ))->mbr_num,
+      uint32 )
+  );*/

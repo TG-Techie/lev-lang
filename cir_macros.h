@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include "varad_macro.h"
 
+#include "cir_mbrof_macro.h"
+
 // TODO: mkae rel calls for sct and cls call all the proper things
 // TODO: add _dec_stmt_def _asn_stmt_def _asnmbr_stmt_def
 // TODO: make syntax for setting mbr,  maby separate getmbr() to get( mbrof() )
@@ -77,19 +79,11 @@ getmbr: #this is a macro : getmbr_<name>() -> type(Member)
     struct_content_ptr_def(typename, members)\
 
 // expressions
-#define getvar(name, type)\
-    get_##type(var_##name)
+#define get(subject, type)\
+    get_##type(subject)
 
 #define call(fnname, args)\
     fn_##fnname args
-
-#define _getmbr_val(value, valtype, mbrname)\
-    expose_mbrs_##valtype(var_##value).mbr_##mbrname
-
-#define getmbr(mbrname, mbrtype, outervalue_expr, outertype)\
-    get_##mbrtype(expose_mbrs_##outertype(outervalue_expr).mbr_##mbrname)
-// #define getmbr(value, valtype, mbrname, mbrtype) \
-//     get_##mbrtype(_getmbr_val(value, valtype, mbrname))
 
 #define new(type, content) \
     new_##type( (content_##type) content)
@@ -100,33 +94,26 @@ getmbr: #this is a macro : getmbr_<name>() -> type(Member)
 
 // stamtements
 
-// dec and rel are retired since locals/args were introduced to fn syntax
-// #define dec(name, type) \
-//     type var_##name = dec_dflt_##type();\
-//     type tmp_asn_##name;\
-//
-//
-// #define rel(value, type) \
-//     rel_##type(var_##value);
+// var asn target
+#define var(name) \
+    var_##name
 
-#define asnvar(varname, type, value) \
-    tmp_asn_##varname = var_##varname; \
-    var_##varname = value; \
-    rel_##type(tmp_asn_##varname);\
+#define comment(string) \
+    string;
 
-// #define asnmbr(mbrname, mbrtype, varname, vartype, expr) \
-//     rel_##mbrtype(expose_mbrs_##vartype(\
-//             get_##vartype(varname)\
-//         ).mbr_##mbrname);\
-//     content_ptr_##vartype(\
-//             &var_##varname\
-//         )->mbr_##mbrname = expr;\
 
-// #define asnmbr(mbrname, mbrtype, varexpr, vartype, expr) \
-//     rel_##mbrtype(expose_mbrs_##vartype(varexpr).mbr_##mbrname);\
-//     content_ptr_##vartype(\
-//             &var_##varname\
-//         )->mbr_##mbrname = expr;\
+#define asn(asntarget, expr, type) \
+    {\
+        type* target_ptr = &(asntarget); \
+        type prev_value = *target_ptr; \
+        *target_ptr = expr; \
+        rel_##type(prev_value); \
+    }\
+
+// #define asnvar(varname, type, value) \
+//     tmp_asnvar_##varname = var_##varname; \
+//     var_##varname = value; \
+//     rel_##type(tmp_asnvar_##varname);\
 
 #define asnmbr(mbrname, mbrtype, varexpr, vartype, expr) \
     {\
@@ -135,18 +122,13 @@ getmbr: #this is a macro : getmbr_<name>() -> type(Member)
         content_ptr_##vartype(&asnmbr_temp)->mbr_##mbrname = expr;\
     }\
 
-    // rel_##mbrtype(expose_mbrs_##vartype(varexpr).mbr_##mbrname);\
-    // content_ptr_##vartype(\
-    //         &var_##varname\
-    //     )->mbr_##mbrname = expr;\
 
 // turn expression into content ri_cpu_time_qos_user_interactiv
 // pass cntn_ptr into fn(cntn_ptr, &(cntn_ptr->mbr_name))
 
-#define ret(type, value) \
-    type _return_tmp_ = value; goto fn_return_label;
-// #define ret(value, type)\
-//     return ret_##type(var_##value);
+#define ret(expr, type) \
+    type _return_tmp_ = expr; goto fn_return_label;
+
 
 #define brk break;
 
@@ -164,8 +146,8 @@ getmbr: #this is a macro : getmbr_<name>() -> type(Member)
 // debug statments
 #define dropin(...) __VA_ARGS__
 #define dbg(...) __VA_ARGS__ ;
-#define print_refcount(name, type)\
-    printf("`" #name "`'s ref count = %llu\n", var_##name->rc);
+#define print_refcount(subject, type)\
+    printf("`" #subject "`'s ref count = %llu\n", subject->rc);
 
 
 
@@ -187,7 +169,9 @@ getmbr: #this is a macro : getmbr_<name>() -> type(Member)
 #define VARNT_IMPL_arg_to_dec_tmp_
 #define VARNT_IMPL_arg_to_dec_tmp_arg VARNT_IMPL_arg_to_dec_tmp_any
 #define VARNT_IMPL_arg_to_dec_tmp_lcl VARNT_IMPL_arg_to_dec_tmp_any
-#define VARNT_IMPL_arg_to_dec_tmp_any(name, type) type tmp_asn_##name;
+#define VARNT_IMPL_arg_to_dec_tmp_any(name, type) \
+    type tmp_asnvar_##name; \
+    type tmp_mbrof_##name; \
 
 #define _dec_dflt_from_locals(...)\
     VARAD_VARNT_MACRO(lcl_to_dec_deflt_, __VA_ARGS__)

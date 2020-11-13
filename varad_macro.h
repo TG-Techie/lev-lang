@@ -1,3 +1,5 @@
+#pragma once
+
 /* USAGE:
 
 #define body_mbrs(...) { VARAD_VARNT_MACRO(body, __VA_ARGS__) }
