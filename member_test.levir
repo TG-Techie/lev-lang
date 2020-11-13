@@ -1,0 +1,36 @@
+
+struct(SctC, mbrs(
+    mbr(num, uint32)
+))
+
+struct(SctB, mbrs(
+    mbr(bar, SctC)
+))
+
+struct(SctA, mbrs(
+    mbr(foo, SctB)
+))
+
+
+fn(main, uint32,
+    args(),
+    locals(lcl(sct_outer, SctA)),
+    frame(
+        asnvar(sct_outer, SctA, new(SctA, {
+            new(SctB, {
+                new(SctC, {litrl(uint32, 88)})
+            })
+        }))
+
+        dbg( printf("%d\n", (
+                content_ptr_SctC(
+                    &(content_ptr_SctB(
+                        &(content_ptr_SctA(&var_sct_outer)->mbr_foo)
+                    )->mbr_bar)
+                )->mbr_num
+            ).native
+        ))
+
+        ret(uint32, litrl(uint32, 1))
+    )
+)

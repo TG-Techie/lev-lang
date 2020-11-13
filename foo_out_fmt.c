@@ -1,10 +1,10 @@
-# 1 "inc_boot_trans1.c"
+# 1 "compile_basic_levir.c"
 # 1 "<built-in>" 1
 # 1 "<built-in>" 3
 # 352 "<built-in>" 3
 # 1 "<command line>" 1
 # 1 "<built-in>" 2
-# 1 "inc_boot_trans1.c" 2
+# 1 "compile_basic_levir.c" 2
 # 1 "./cir_macros.h" 1
 # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk/usr/include/stdlib.h" 1 3 4
 # 61 "/Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk/usr/include/stdlib.h" 3 4
@@ -1805,7 +1805,7 @@ extern int __vsnprintf_chk(char *restrict, size_t, int, size_t,
 # 4 "./cir_macros.h" 2
 # 22 "./cir_macros.h"
 typedef uint64_t RefCount;
-# 2 "inc_boot_trans1.c" 2
+# 2 "compile_basic_levir.c" 2
 # 1 "./cir_builtins.h" 1
 
 # 1 "/usr/local/Cellar/llvm/10.0.1/lib/clang/10.0.1/include/stdbool.h" 1 3
@@ -1921,16 +1921,15 @@ float64 get_float64(float64 self) { return self; }
 void rel_float64(float64 self) { return; }
 float64 dec_dflt_float64() { return (float64){0}; }
 float64 ret_float64(float64 self) { return self; }
-# 3 "inc_boot_trans1.c" 2
+# 3 "compile_basic_levir.c" 2
+
+# 1 "./basic.levir" 1
 
 typedef struct mod_main_Point {
   uint32 mbr_x;
   uint32 mbr_y;
 } mod_main_Point;
 typedef mod_main_Point content_mod_main_Point;
-content_mod_main_Point contentof_mod_main_Point(mod_main_Point self) {
-  return self;
-}
 mod_main_Point new_mod_main_Point(content_mod_main_Point content) {
   return content;
 }
@@ -1952,6 +1951,13 @@ mod_main_Point dec_dflt_mod_main_Point() {
   };
 }
 mod_main_Point ret_mod_main_Point(mod_main_Point self) { return self; }
+content_mod_main_Point expose_mbrs_mod_main_Point(mod_main_Point selfexpr) {
+  rel_mod_main_Point(selfexpr);
+  return selfexpr;
+}
+content_mod_main_Point *content_ptr_mod_main_Point(mod_main_Point *self_ptr) {
+  return (content_mod_main_Point *)self_ptr;
+}
 
 typedef struct content_mod_main_Counter {
   uint32 mbr__count;
@@ -1960,9 +1966,6 @@ typedef struct mod_main_Counter {
   RefCount rc;
   content_mod_main_Counter content;
 } * mod_main_Counter;
-content_mod_main_Counter contentof_mod_main_Counter(mod_main_Counter self) {
-  return self->content;
-}
 mod_main_Counter new_mod_main_Counter(content_mod_main_Counter content) {
   mod_main_Counter self = malloc(sizeof(struct mod_main_Counter));
   self->rc = 1;
@@ -1986,30 +1989,52 @@ void rel_mod_main_Counter(mod_main_Counter self) {
 }
 mod_main_Counter dec_dflt_mod_main_Counter() { return ((void *)0); }
 mod_main_Counter ret_mod_main_Counter(mod_main_Counter self) { return self; }
-
+content_mod_main_Counter
+expose_mbrs_mod_main_Counter(mod_main_Counter selfexpr) {
+  rel_mod_main_Counter(selfexpr);
+  return selfexpr->content;
+}
+content_mod_main_Counter *
+content_ptr_mod_main_Counter(mod_main_Counter *self_ptr) {
+  mod_main_Counter self = *self_ptr;
+  return &(self->content);
+}
+# 22 "./basic.levir"
 uint32 fn_main(void) {
   mod_main_Counter var_foo = dec_dflt_mod_main_Counter();
-  uint32 var_foombr = dec_dflt_uint32();
+  uint32 var_foombr1 = dec_dflt_uint32();
+  uint32 var_foombr2 = dec_dflt_uint32();
   mod_main_Counter tmp_asn_foo;
-  uint32 tmp_asn_foombr;
+  uint32 tmp_asn_foombr1;
+  uint32 tmp_asn_foombr2;
   tmp_asn_foo = var_foo;
-  var_foo = mod_main_Counter;
-  rel_new(mod_main_Counter, {litrl_uint32(6)})(tmp_asn_foo);
-  tmp_asn_foombr = var_foombr;
-  var_foombr = uint32;
-  rel_getmbr(foo, mod_main_Counter, _count, uint32)(tmp_asn_foombr);
-  printf("`"
-         "foo"
-         "`'s ref count = %llu\n",
-         var_foo->rc);
-  uint32 _return_tmp_ = get_uint32(var_foombr);
+  var_foo = new_mod_main_Counter((content_mod_main_Counter){litrl_uint32(6)});
+  rel_mod_main_Counter(tmp_asn_foo);
+  printf("1rc: %llu\n", var_foo->rc);
+  tmp_asn_foombr1 = var_foombr1;
+  var_foombr1 = get_uint32(
+      expose_mbrs_mod_main_Counter(get_mod_main_Counter(var_foo)).mbr__count);
+  rel_uint32(tmp_asn_foombr1);
+  printf("2rc: %llu\n", var_foo->rc);
+  printf("%d\n", var_foo->content.mbr__count.native);
+  printf("3rc: %llu\n", var_foo->rc);
+  printf("4rc: %llu\n", var_foo->rc);
+  printf("%d\n", var_foo->content.mbr__count.native);
+  tmp_asn_foombr2 = var_foombr2;
+  var_foombr2 = get_uint32(
+      expose_mbrs_mod_main_Counter(get_mod_main_Counter(var_foo)).mbr__count);
+  rel_uint32(tmp_asn_foombr2);
+  printf("5rc: %llu\n", var_foo->rc);
+  uint32 _return_tmp_ = get_uint32(var_foombr1);
   goto fn_return_label;
 fn_return_label:
   rel_mod_main_Counter(var_foo);
-  rel_uint32(var_foombr);
+  rel_uint32(var_foombr1);
+  rel_uint32(var_foombr2);
   return _return_tmp_;
 }
-# 27 "inc_boot_trans1.c"
+# 5 "compile_basic_levir.c" 2
+
 int main(void) {
   fn_main();
   return 0;

@@ -55,39 +55,41 @@ getmbr: #this is a macro : getmbr_<name>() -> type(Member)
         return _return_tmp_;\
     } \
 
-
-
 #define class(typename, members)\
     class_body_def(typename, members)\
-    class_contentof_internal(typename, members)\
     class_new_expr_def(typename, members)\
     class_get_expr_def(typename, members)\
     class_rel_expr_def(typename, members)\
     class_dec_deflt_def(typename, members)\
     class_ret_def(typename, members)\
+    class_expose_mbrs_def(typename, members)\
+    class_content_ptr_def(typename, members)\
 
 
 #define struct(typename, members)\
     struct_body_def(typename, members)\
-    struct_contentof_internal(typename, members)\
     struct_new_expr_def(typename, members)\
     struct_get_expr_def(typename, members)\
     struct_rel_expr_def(typename, members)\
     struct_dec_deflt_def(typename, members)\
     struct_ret_def(typename, members)\
+    struct_expose_mbrs_def(typename, members)\
+    struct_content_ptr_def(typename, members)\
 
 // expressions
-#define get(name, type)\
+#define getvar(name, type)\
     get_##type(var_##name)
 
 #define call(fnname, args)\
     fn_##fnname args
 
 #define _getmbr_val(value, valtype, mbrname)\
-    contentof_##valtype(var_##value).mbr_##mbrname
+    expose_mbrs_##valtype(var_##value).mbr_##mbrname
 
-#define getmbr(value, valtype, mbrname, mbrtype) \
-    get_##mbrtype(_getmbr_val(value, valtype, mbrname))
+#define getmbr(mbrname, mbrtype, outervalue_expr, outertype)\
+    get_##mbrtype(expose_mbrs_##outertype(outervalue_expr).mbr_##mbrname)
+// #define getmbr(value, valtype, mbrname, mbrtype) \
+//     get_##mbrtype(_getmbr_val(value, valtype, mbrname))
 
 #define new(type, content) \
     new_##type( (content_##type) content)
@@ -98,7 +100,7 @@ getmbr: #this is a macro : getmbr_<name>() -> type(Member)
 
 // stamtements
 
-// these are retired since locals/args were introduced to fn syntax
+// dec and rel are retired since locals/args were introduced to fn syntax
 // #define dec(name, type) \
 //     type var_##name = dec_dflt_##type();\
 //     type tmp_asn_##name;\
@@ -107,10 +109,39 @@ getmbr: #this is a macro : getmbr_<name>() -> type(Member)
 // #define rel(value, type) \
 //     rel_##type(var_##value);
 
-#define asn(name, type, value) \
-    tmp_asn_##name = var_##name; \
-    var_##name = value; \
-    rel_##type(tmp_asn_##name);\
+#define asnvar(varname, type, value) \
+    tmp_asn_##varname = var_##varname; \
+    var_##varname = value; \
+    rel_##type(tmp_asn_##varname);\
+
+// #define asnmbr(mbrname, mbrtype, varname, vartype, expr) \
+//     rel_##mbrtype(expose_mbrs_##vartype(\
+//             get_##vartype(varname)\
+//         ).mbr_##mbrname);\
+//     content_ptr_##vartype(\
+//             &var_##varname\
+//         )->mbr_##mbrname = expr;\
+
+// #define asnmbr(mbrname, mbrtype, varexpr, vartype, expr) \
+//     rel_##mbrtype(expose_mbrs_##vartype(varexpr).mbr_##mbrname);\
+//     content_ptr_##vartype(\
+//             &var_##varname\
+//         )->mbr_##mbrname = expr;\
+
+#define asnmbr(mbrname, mbrtype, varexpr, vartype, expr) \
+    {\
+        vartype asnmbr_temp = varexpr;\
+        rel_##mbrtype(expose_mbrs_##vartype(asnmbr_temp).mbr_##mbrname);\
+        content_ptr_##vartype(&asnmbr_temp)->mbr_##mbrname = expr;\
+    }\
+
+    // rel_##mbrtype(expose_mbrs_##vartype(varexpr).mbr_##mbrname);\
+    // content_ptr_##vartype(\
+    //         &var_##varname\
+    //     )->mbr_##mbrname = expr;\
+
+// turn expression into content ri_cpu_time_qos_user_interactiv
+// pass cntn_ptr into fn(cntn_ptr, &(cntn_ptr->mbr_name))
 
 #define ret(type, value) \
     type _return_tmp_ = value; goto fn_return_label;
@@ -131,8 +162,12 @@ getmbr: #this is a macro : getmbr_<name>() -> type(Member)
 */
 
 // debug statments
-#define dbg_print_refcount(name, type)\
+#define dropin(...) __VA_ARGS__
+#define dbg(...) __VA_ARGS__ ;
+#define print_refcount(name, type)\
     printf("`" #name "`'s ref count = %llu\n", var_##name->rc);
+
+
 
 ///// function macro specifics ///////
 
@@ -192,9 +227,13 @@ getmbr: #this is a macro : getmbr_<name>() -> type(Member)
         }\
     *typename;
 
-#define class_contentof_internal(typename, members)\
-    content_##typename contentof_##typename(typename self){\
-        return self->content;\
+
+// expose_mbrs_SomeType() takes an expression as it is only use in set and
+//  get members. this means that it, as a funciton, needs to rel the inputs
+#define class_expose_mbrs_def(typename, members)\
+    content_##typename expose_mbrs_##typename(typename selfexpr){\
+        rel_##typename(selfexpr);\
+        return selfexpr->content;\
     }
 
 #define class_new_expr_def(typename, members)\
@@ -232,6 +271,11 @@ getmbr: #this is a macro : getmbr_<name>() -> type(Member)
         return self;\
     }\
 
+#define class_content_ptr_def(typename, members)\
+    content_##typename* content_ptr_##typename(typename* self_ptr){\
+        typename self = *self_ptr;\
+        return &(self->content);\
+    }\
 
 #define copyblock_from_mbrs(...) {VARAD_VARNT_MACRO(copyblock_, __VA_ARGS__)}
 #define VARNT_IMPL_copyblock_
@@ -252,9 +296,12 @@ getmbr: #this is a macro : getmbr_<name>() -> type(Member)
         typename;\
         typedef typename content_##typename;\
 
-#define struct_contentof_internal(typename, members)\
-    content_##typename contentof_##typename(typename self){\
-        return self;\
+// expose_mbrs_SomeType() takes an expression as it is only use in set and
+//  get members. this means that it, as a funciton, needs to rel the inputs
+#define struct_expose_mbrs_def(typename, members)\
+    content_##typename expose_mbrs_##typename(typename selfexpr){\
+        rel_##typename(selfexpr);\
+        return selfexpr;\
     }
 
 #define struct_new_expr_def(typename, members)\
@@ -282,3 +329,9 @@ getmbr: #this is a macro : getmbr_<name>() -> type(Member)
     typename ret_##typename(typename self){\
         return self;\
     }\
+
+
+#define struct_content_ptr_def(typename, members)\
+    content_##typename* content_ptr_##typename(typename* self_ptr){\
+        return (content_##typename*) self_ptr;\
+    }
