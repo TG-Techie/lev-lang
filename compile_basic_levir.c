@@ -4,6 +4,6 @@
 #include "basic.levir"
 
 int main(void) {
-    call(main, ());
+    fncall(main, args());
     return 0;
 }

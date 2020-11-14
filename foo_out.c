@@ -1988,7 +1988,11 @@ extern int __vsnprintf_chk (char * restrict, size_t, int, size_t,
 
 # 1 "./cir_mbrof_macro.h" 1
 # 6 "./cir_macros.h" 2
-# 24 "./cir_macros.h"
+# 1 "./cir_func_mthd_macro.h" 1
+# 7 "./cir_macros.h" 2
+# 1 "./cir_struct_proxy_macro.h" 1
+# 8 "./cir_macros.h" 2
+# 25 "./cir_macros.h"
 typedef uint64_t RefCount;
 # 2 "compile_basic_levir.c" 2
 # 1 "./cir_builtins.h" 1
@@ -1998,7 +2002,16 @@ typedef uint64_t RefCount;
 # 4 "./cir_builtins.h" 2
 
 # 1 "./cir_macros.h" 1
-# 24 "./cir_macros.h"
+
+
+
+
+
+# 1 "./cir_func_mthd_macro.h" 1
+# 7 "./cir_macros.h" 2
+# 1 "./cir_struct_proxy_macro.h" 1
+# 8 "./cir_macros.h" 2
+# 25 "./cir_macros.h"
 typedef uint64_t RefCount;
 # 6 "./cir_builtins.h" 2
 # 17 "./cir_builtins.h"
@@ -2021,17 +2034,11 @@ typedef struct float64 { double native; } float64; typedef float64 content_float
 
 
 
-typedef struct mod_main_Point { uint32 mbr_x; uint32 mbr_y; } mod_main_Point; typedef mod_main_Point content_mod_main_Point; mod_main_Point new_mod_main_Point(content_mod_main_Point content) { return content; } mod_main_Point get_mod_main_Point(mod_main_Point self){ return (mod_main_Point) {get_uint32(self.mbr_x), get_uint32(self.mbr_y), }; } void rel_mod_main_Point(mod_main_Point self){ rel_uint32(self.mbr_x); rel_uint32(self.mbr_y); return; } mod_main_Point dec_dflt_mod_main_Point(){ return (mod_main_Point) {dec_dflt_uint32(), dec_dflt_uint32(), }; } mod_main_Point ret_mod_main_Point(mod_main_Point self){ return self; } content_mod_main_Point expose_mbrs_mod_main_Point(mod_main_Point selfexpr){ rel_mod_main_Point(selfexpr); return selfexpr; } content_mod_main_Point* content_ptr_mod_main_Point(mod_main_Point* self_ptr){ return (content_mod_main_Point*) self_ptr; }
-
-
-
-
-
-
-
-typedef struct content_mod_main_Counter { uint32 mbr__count; } content_mod_main_Counter; typedef struct mod_main_Counter { RefCount rc; content_mod_main_Counter content; } *mod_main_Counter; mod_main_Counter new_mod_main_Counter(content_mod_main_Counter content) { mod_main_Counter self = malloc(sizeof(struct mod_main_Counter)); self->rc = 1; self->content = content; return self; } mod_main_Counter get_mod_main_Counter(mod_main_Counter self){ self->rc +=1; return self; } void rel_mod_main_Counter(mod_main_Counter self) { if (self == ((void *)0)){return;} self->rc -= 1; if (self->rc == 0){ rel_uint32(self->content.mbr__count); free(self); } return; } mod_main_Counter dec_dflt_mod_main_Counter(){ return ((void *)0); } mod_main_Counter ret_mod_main_Counter(mod_main_Counter self){ return self; } content_mod_main_Counter expose_mbrs_mod_main_Counter(mod_main_Counter selfexpr){ rel_mod_main_Counter(selfexpr); return selfexpr->content; } content_mod_main_Counter* content_ptr_mod_main_Counter(mod_main_Counter* self_ptr){ mod_main_Counter self = *self_ptr; return &(self->content); }
-# 22 "./basic.levir"
-uint32 fn_main ( void ) { mod_main_Counter var_foo = dec_dflt_mod_main_Counter(); uint32 var_foombr1 = dec_dflt_uint32(); uint32 var_foombr2 = dec_dflt_uint32(); mod_main_Counter tmp_asnvar_foo; mod_main_Counter tmp_mbrof_foo; uint32 tmp_asnvar_foombr1; uint32 tmp_mbrof_foombr1; uint32 tmp_asnvar_foombr2; uint32 tmp_mbrof_foombr2; { mod_main_Counter* target_ptr = &(var_foo); mod_main_Counter prev_value = *target_ptr; *target_ptr = new_mod_main_Counter( (content_mod_main_Counter) {litrl_uint32(6)}); rel_mod_main_Counter(prev_value); } { uint32* target_ptr = &(var_foombr1); uint32 prev_value = *target_ptr; *target_ptr = get_uint32(content_ptr_mod_main_Counter(&(var_foo))->mbr__count); rel_uint32(prev_value); } { uint32* target_ptr = &(content_ptr_mod_main_Counter(&(var_foo))->mbr__count); uint32 prev_value = *target_ptr; *target_ptr = litrl_uint32(128); rel_uint32(prev_value); } { uint32* target_ptr = &(var_foombr2); uint32 prev_value = *target_ptr; *target_ptr = get_uint32(content_ptr_mod_main_Counter(&(var_foo))->mbr__count); rel_uint32(prev_value); } uint32 _return_tmp_ = get_uint32(var_foombr1); goto fn_return_label; fn_return_label: rel_mod_main_Counter(var_foo); rel_uint32(var_foombr1); rel_uint32(var_foombr2); return _return_tmp_; }
+typedef struct mod_main_Point { uint32 mbr_x; uint32 mbr_y; } mod_main_Point; typedef mod_main_Point content_mod_main_Point; mod_main_Point new_mod_main_Point(content_mod_main_Point content) { return content; } mod_main_Point get_mod_main_Point(mod_main_Point self){ return (mod_main_Point) {get_uint32(self.mbr_x), get_uint32(self.mbr_y), }; } void rel_mod_main_Point(mod_main_Point self){ rel_uint32(self.mbr_x); rel_uint32(self.mbr_y); return; } mod_main_Point dec_dflt_mod_main_Point(){ return (mod_main_Point) {dec_dflt_uint32(), dec_dflt_uint32(), }; } mod_main_Point ret_mod_main_Point(mod_main_Point self){ return self; } content_mod_main_Point* content_ptr_mod_main_Point(mod_main_Point* self_ptr){ return (content_mod_main_Point*) self_ptr; } typedef mod_main_Point* mutble_proxy_mod_main_Point; mutble_proxy_mod_main_Point get_mutble_proxy_mod_main_Point(mutble_proxy_mod_main_Point self){ get_mod_main_Point(*self); return self; } void rel_mutble_proxy_mod_main_Point(mutble_proxy_mod_main_Point self){ return rel_mod_main_Point(*self); } mutble_proxy_mod_main_Point dec_dflt_mutble_proxy_mod_main_Point(){ return ((void *)0); } mod_main_Point ret_mutble_proxy_mod_main_Point(mutble_proxy_mod_main_Point self){ return *self; } content_mod_main_Point* content_ptr_mutble_proxy_mod_main_Point(mutble_proxy_mod_main_Point* self_ptr){ mutble_proxy_mod_main_Point self = *self_ptr; return (content_mod_main_Point*) self; } mutble_proxy_mod_main_Point proxy_mutble_proxy_mod_main_Point(mutble_proxy_mod_main_Point* self_ptr) { return *self_ptr; } mutble_proxy_mod_main_Point proxy_mod_main_Point(mod_main_Point* self){ return (mutble_proxy_mod_main_Point) self; }
+# 15 "./basic.levir"
+typedef struct content_mod_main_Counter { uint32 mbr__count; } content_mod_main_Counter; typedef struct mod_main_Counter { RefCount rc; content_mod_main_Counter content; } *mod_main_Counter; mod_main_Counter new_mod_main_Counter(content_mod_main_Counter content) { mod_main_Counter self = malloc(sizeof(struct mod_main_Counter)); self->rc = 1; self->content = content; return self; } mod_main_Counter get_mod_main_Counter(mod_main_Counter self){ self->rc +=1; return self; } void rel_mod_main_Counter(mod_main_Counter self) { if (self == ((void *)0)){return;} self->rc -= 1; if (self->rc == 0){ rel_uint32(self->content.mbr__count); free(self); } return; } mod_main_Counter dec_dflt_mod_main_Counter(){ return ((void *)0); } mod_main_Counter ret_mod_main_Counter(mod_main_Counter self){ return self; } content_mod_main_Counter* content_ptr_mod_main_Counter(mod_main_Counter* self_ptr){ mod_main_Counter self = *self_ptr; return &(self->content); }
+# 28 "./basic.levir"
+uint32 fn_main ( void ) { mod_main_Counter var_foo = dec_dflt_mod_main_Counter(); uint32 var_foombr1 = dec_dflt_uint32(); uint32 var_foombr2 = dec_dflt_uint32(); { mod_main_Counter* target_ptr = &(var_foo); mod_main_Counter prev_value = *target_ptr; *target_ptr = new_mod_main_Counter( (content_mod_main_Counter) {litrl_uint32(6)}); rel_mod_main_Counter(prev_value); } printf("1rc: %llu\n", var_foo->rc); { uint32* target_ptr = &(var_foombr1); uint32 prev_value = *target_ptr; *target_ptr = get_uint32(content_ptr_mod_main_Counter(&(var_foo))->mbr__count); rel_uint32(prev_value); } printf("2rc: %llu\n", var_foo->rc); printf("%d\n", var_foo->content.mbr__count.native); printf("3rc: %llu\n", var_foo->rc); { uint32* target_ptr = &(content_ptr_mod_main_Counter(&(var_foo))->mbr__count); uint32 prev_value = *target_ptr; *target_ptr = litrl_uint32(128); rel_uint32(prev_value); } printf("4rc: %llu\n", var_foo->rc); printf("%d\n", var_foo->content.mbr__count.native); { uint32* target_ptr = &(var_foombr2); uint32 prev_value = *target_ptr; *target_ptr = get_uint32(content_ptr_mod_main_Counter(&(var_foo))->mbr__count); rel_uint32(prev_value); } printf("5rc: %llu\n", var_foo->rc); printf("foombr1: %d\n", var_foombr1.native); printf("foombr2: %d\n", var_foombr2.native); uint32 _return_tmp_ = get_uint32(var_foombr1); goto _return_label_; _return_label_: rel_mod_main_Counter(var_foo); rel_uint32(var_foombr1); rel_uint32(var_foombr2); return _return_tmp_; }
 # 5 "compile_basic_levir.c" 2
 
 int main(void) {

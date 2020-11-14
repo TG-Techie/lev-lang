@@ -41,35 +41,41 @@ c_symbol: /\*\&/
 
 // expressions
 
-expr: get_expr | call_expr
+expr: get_expr | call_expr  | mthdcall_expr
     | new_expr | litrl_expr
 
 get_expr: "get" "(" subject "," type ")"
 
-call_expr: "call" "(" fnname "," "(" list{expr, ","} ")" ")"
+fncall_expr: "fncall" "(" fnname ","  call_params ")"
+mthdcall_expr: "mthdcall" "(" type "," fnname "," selfexpr "," call_params ")"
+
+selfexpr: "mutself" "(" expr ")" | "self" "(" expr ")"
+call_params: "(" list{expr, ","} ")"
+
 new_expr: "new" "(" type "," new_body ")"
 litrl_expr: "litrl" "(" type "," literal ")"
 
 new_body: "{" list{expr, ","} "}"
 
 subject: var_subject | mbrof_subject
-var_subject: "var" "(" varname ")"
+var_subject: "var" "(" varname "," vartype")"
 mbrof_subject: "mbrof" "(" varname "," vartype "," (mbr | mbrs) ")"
+// "mutselfprx" "(" varname "," vartype ")"
 
 // named idents (for clarity)
 name: IDENT
 
-type: IDENT
-typename: IDENT
+type: ("mutbl" "(" IDENT ")") | IDENT
+typename: type
 
-mbrtype: IDENT
+mbrtype: type
 mbrname: IDENT
 
-vartype:IDENT
+vartype:type
 varname:IDENT
 
 fnname: IDENT
-rettype: IDENT
+rettype: IDENT // mutble proxies cannot be returned
 
 literal: STRING | LONGSTRING | FLOAT | INT
 

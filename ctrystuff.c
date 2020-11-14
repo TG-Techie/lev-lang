@@ -47,7 +47,7 @@
         _paste_##frame\
         "comment: exiting function body";\
         "comment: return procedure";\
-        fn_return_label:\
+        _return_label_:\
         _rel_from_##args\
         _rel_from_##locals\
         return _return_tmp_;\
@@ -58,7 +58,7 @@
 
 #define asn(name, val, type) var_##name = val;
 #define asn(name, val, type) var_##name = val;
-#define ret(value, type) type _return_tmp_ = value; goto fn_return_label;
+#define ret(value, type) type _return_tmp_ = value; goto _return_label_;
 
 fn(add_two, uint64,
     args(
