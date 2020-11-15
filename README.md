@@ -20,17 +20,21 @@ class(mod_main_Counter, mbrs(
 ))
 
 // example of a function def
-fn(main, uint16, args(), 
-    locals( lcl(x, uint16) ), // list all local variables
+/*
+int32_t main(void){
+    int32_t x;
+    x = 0;
+    return x;
+}
+*/
+fn(main, uint32, args(), 
+    locals( lcl(x, uint32) ), // list all local variables
     frame( 
-        // x = 0;
-        asn( // =
-            var(x, uint16), // x
-            litrl(uint16, 0), // 0
-            uint16
+        asn(var(x, uint32), 
+            litrl(uint32, 0),
+            uint32
         )
-        // return x;
-        ret(get(var(x, uint16), uint16))
+        ret(get(var(x, uint32), uint32))
     )
 )
 ```
