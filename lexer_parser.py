@@ -29,8 +29,14 @@ def parse_str(string):
     global _parser
     return _parser.parse(string)
 
-with open('basic.levir') as file:
-    print(
-        parse_str(file.read())
-            .pretty()
-    )
+def parse_file(name: str):
+    with open(name) as file:
+        print(
+            parse_str(file.read())
+                .pretty()
+        )
+
+if __name__ == '__main__':
+    import sys
+    print(sys.argv)
+    parse_file(sys.argv[1])

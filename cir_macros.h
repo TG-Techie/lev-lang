@@ -12,9 +12,17 @@
 // it also means taht it give the language above more grandular controll!
 
 
+
 //tools
 //  clang -E inc_boot_trans1.c &> foo_out.c; clang-format foo_out.c > foo_out_fmt.c
 //  rm a.out; clang inc_boot_trans1.c; ./a.out
+
+/// as one:
+// clang -E compile_basic_levir.c > foo_out.c;
+// clang-format foo_out.c > foo_out_fmt.c;
+// rm a.out;
+// clang -Wno-unused-value compile_basic_levir.c; ./a.out
+
 
 
 
@@ -87,8 +95,11 @@ getmbr: #this is a macro : getmbr_<name>() -> type(Member)
 
 #define _unpack_args(...) __VA_ARGS__
 
-#define new(type, content) \
-    new_##type( (content_##type) content)
+
+#define new(type, cntn) \
+    new_##type( (content_##type) _unpack_##cntn)
+
+#define _unpack_cntn(...) { __VA_ARGS__ }
 
 #define litrl(type, value) \
     litrl_##type(value)
@@ -100,8 +111,9 @@ getmbr: #this is a macro : getmbr_<name>() -> type(Member)
 #define var(name, type) \
     var_##name
 
-#define comment(string) \
-    string;
+// usage: btw("comment", "comment", "etc")
+#define btw(...) \
+    (__VA_ARGS__);
 
 
 #define asn(asntarget, expr, type) \
@@ -116,7 +128,8 @@ getmbr: #this is a macro : getmbr_<name>() -> type(Member)
 // pass cntn_ptr into fn(cntn_ptr, &(cntn_ptr->mbr_name))
 
 #define ret(expr, type) \
-    type _return_tmp_ = expr; goto _return_label_;
+    type _return_tmp_ = expr;\
+    goto _return_label_;
 
 
 #define brk break;
@@ -136,6 +149,15 @@ getmbr: #this is a macro : getmbr_<name>() -> type(Member)
 #define dbg(...) __VA_ARGS__ ;
 #define print_refcount(subject, type)\
     printf("`" #subject "`'s ref count = %llu\n", subject->rc);
+#define rc(subject)\
+    { \
+        ("dbg(rc(",#subject,"))");\
+        if (subject == NULL) {\
+            printf("unable to get rc of `" #subject "`, not yet assigned\n");\
+        } else {\
+            printf("rc of `" #subject "`'s is %llu\n", subject->rc); \
+        }\
+    }\
 
 
 
@@ -170,6 +192,9 @@ getmbr: #this is a macro : getmbr_<name>() -> type(Member)
 
 #define class_get_expr_def(typename, members)\
     typename get_##typename(typename self){\
+        if (self == NULL) { \
+            printf("local variable used before assignment\n"); *NULL;\
+        } \
         self->rc +=1;\
         return self;\
     }

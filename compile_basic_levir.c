@@ -1,7 +1,7 @@
 #include "cir_macros.h"
 #include "cir_builtins.h"
 
-#include "basic.levir"
+#include "methodtest.levir"
 
 int main(void) {
     fncall(main, args());

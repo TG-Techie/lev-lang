@@ -1,0 +1,54 @@
+class(RefdNum, mbrs(
+    mbr(num, int16)
+))
+
+class(ClsWith2Mbrs, mbrs(
+    mbr(a, int16),
+    mbr(b, int16)
+))
+
+struct(LinkedPoint, mbrs(
+    mbr(_x, RefdNum),
+    mbr(_y, RefdNum),
+))
+
+// method(RefdNum, inc, NoneType, args(
+//         arg(self, mutbl(RefdNum))
+//     ),
+//     locals(),
+//     frame(
+//
+//     )
+// )
+
+fn(main, int16, args(),
+    locals( lcl(point, LinkedPoint), lcl(foo, RefdNum), lcl(newtest, ClsWith2Mbrs)),
+    frame(
+        btw(
+            "test new method of making new objects",
+            "the one w/ cntn 'content'"
+        )
+        asn(var(newtest, ClsWith2Mbrs),
+            new(ClsWith2Mbrs, cntn(
+                //get(mbrof(foo, RefdNum, mbr(num, int16)), int16),
+                litrl(int16, 127),
+                litrl(int16, 255),
+            )),
+            ClsWith2Mbrs
+        )
+
+        dbg(rc(var(foo, RefdNum)))
+        asn(var(point, LinkedPoint),
+            new(LinkedPoint, cntn(
+                new(RefdNum, cntn(
+                    litrl(int16, 127)
+                )),
+                new(RefdNum, cntn(
+                    litrl(int16, 127)
+                ))
+            )),
+            LinkedPoint
+        )
+        ret(litrl(int16, 0), int16)
+    )
+)
