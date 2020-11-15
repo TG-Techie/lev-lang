@@ -9,10 +9,16 @@ struct(mod_main_Point, mbrs(
 
 // class Counter:
 //     _count: uint32
+//     def inc(self):
+//         self._count = self._count + 1
 
 class(mod_main_Counter, mbrs(
     mbr(_count, uint32)
 ))
+
+// method(proxied(mod_main_Counter), inc, void*, args(), locals(), frame(
+//     ret(NULL, void*)
+// ))
 
 // def main () -> uint32:
 //     foo = Counter{_count:6u32}
@@ -23,30 +29,38 @@ fn(main, uint32,
     args(  ),
     locals( lcl(foo, mod_main_Counter), lcl(foombr1, uint32), lcl(foombr2, uint32) ),
     frame(
-        asn(var(foo), new(mod_main_Counter, {litrl(uint32, 6)}), mod_main_Counter)
-        // printf("1rc: %llu\n", var_foo->rc);
-        asn(var(foombr1),
+        asn(var(foo, mod_main_Counter),
+            new(mod_main_Counter, {litrl(uint32, 6)}),
+            mod_main_Counter
+        )
+
+        printf("1rc: %llu\n", var_foo->rc);
+        asn(var(foombr1, uint32),
             get(
                 mbrof(foo, mod_main_Counter, mbr(_count, uint32)),
                 uint32
             ),
             uint32
         )
-        // printf("2rc: %llu\n", var_foo->rc);
-        // printf("%d\n", var_foo->content.mbr__count.native);
-        // printf("3rc: %llu\n", var_foo->rc);
+        printf("2rc: %llu\n", var_foo->rc);
+        printf("%d\n", var_foo->content.mbr__count.native);
+        printf("3rc: %llu\n", var_foo->rc);
 
         asn(mbrof(foo, mod_main_Counter, mbrs(
                 mbr(_count, uint32)
             )), litrl(uint32, 128), uint32
         )
-        // printf("4rc: %llu\n", var_foo->rc);
-        // printf("%d\n", var_foo->content.mbr__count.native);
-        asn(var(foombr2),
+        printf("4rc: %llu\n", var_foo->rc);
+        printf("%d\n", var_foo->content.mbr__count.native);
+        asn(var(foombr2, uint32),
             get(mbrof(foo, mod_main_Counter, mbr(_count, uint32)), uint32),
             uint32
         )
-        // printf("5rc: %llu\n", var_foo->rc);
-        ret(get(var(foombr1), uint32), uint32)
+        printf("5rc: %llu\n", var_foo->rc);
+        printf("foombr1: %d\n", var_foombr1.native);
+        printf("foombr2: %d\n", var_foombr2.native);
+        ret(get(var(foombr1, uint32), uint32), uint32)
     )
 )
+
+// fn(selfproxytest, uint32, )

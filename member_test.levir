@@ -21,7 +21,7 @@ fn(main, uint32,
                 new(SctC, {litrl(uint32, 88)})
             })
         }), SctA)
-        comment("!!!!!!!!!!!!!!!!!!!!!!!")
+        btw("!!!!!!!!!!!!!!!!!!!!!!!")
                  // // SctA tmp_mbrof_sct_outer = getvar(sct_outer, SctA);
         // printf("%d\n",
         //      (
@@ -39,7 +39,7 @@ fn(main, uint32,
                 mbr(num, uint32)
             )
         ), litrl(uint32, 97), uint32)
-        comment("!!!!!!!!!!!")
+        btw("!!!!!!!!!!!")
         // printf("%d\n",
         //      (
         //         mbrof(sct_outer, SctA, mbrs(
@@ -50,7 +50,7 @@ fn(main, uint32,
         //         )
         //     ).native
         // );
-        comment("+++++++++++++")
+        btw("+++++++++++++")
         // strip_trailing(
         //     mbr(foo, SctB),
         //     mbr(bar, SctC),
@@ -61,7 +61,7 @@ fn(main, uint32,
         //     mbr(bar, SctC),
         //     mbr(num, uint32),
         // );
-        comment("!!!!!!!!!!!!!!!!!!!!!!!")
+        btw("!!!!!!!!!!!!!!!!!!!!!!!")
         ret(litrl(uint32, 1), uint32)
     )
 )

@@ -10,6 +10,9 @@ classdef: "class" "("  typename "," mbrs ")"
 structdef: "struct" "(" typename "," mbrs ")"
 fndef: "fn" "(" fnname "," rettype "," args "," locals "," frame ")"
 
+//mthddef: "method(...)"
+// selftype: ("mutbl" "(" type ")") | type
+
 frame: "frame" "(" stmt+ ")"
 
 // info sets
@@ -33,43 +36,57 @@ brk_stmt:  "brk"
 cont_stmt: "cont"
 loop_stmt: "loop" "(" stmt* ")"
 
-passthrough_comment: "comment" "(" STRING ")"
+passthrough_comment: "btw" "(" list{STRING, ","} ")" // turns into STRING ;
 
-dbg_stmt: "dbg" "(" name ("(" list{ dbg_arg, ","} ")")? ")"
-dbg_arg:  c_symbol? (name | expr | literal) c_symbol?
-c_symbol: /\*\&/
+dbg_stmt: "dbg" "(" list{_dbg_content, ","} ")"
+_dbg_content: IDENT | stmt | item | subject
+            | _dbg_content "(" _dbg_content ")"
+            |  _c_symbol _dbg_content
+            | _dbg_content _c_symbol
+            | _dbg_content _c_symbol? _dbg_content
+
+_c_symbol: "."  | "*" | "->" | "^" | "!" | "|" | "&" | "||"
+        | "&&" | "+" | "-"  | "*" | "&" | "~" |
 
 // expressions
 
-expr: get_expr | call_expr
+expr: get_expr | fncall_expr    | mthdcall_expr
     | new_expr | litrl_expr
 
 get_expr: "get" "(" subject "," type ")"
 
-call_expr: "call" "(" fnname "," "(" list{expr, ","} ")" ")"
+fncall_expr: "fncall" "(" fnname ","  call_params ")"
+mthdcall_expr: "mthdcall" "(" type "," fnname "," selfexpr "," call_params ")"
+selfexpr: "mutself" "(" expr ")" | "self" "(" expr ")"
+
+call_params: "(" list{expr, ","} ")"
+
 new_expr: "new" "(" type "," new_body ")"
 litrl_expr: "litrl" "(" type "," literal ")"
 
-new_body: "{" list{expr, ","} "}"
+new_body: "cntn" "(" list{expr, ","} ")"
 
 subject: var_subject | mbrof_subject
-var_subject: "var" "(" varname ")"
+var_subject: "var" "(" varname "," vartype")"
 mbrof_subject: "mbrof" "(" varname "," vartype "," (mbr | mbrs) ")"
+// "mutselfprx" "(" varname "," vartype ")"
 
 // named idents (for clarity)
 name: IDENT
 
 type: IDENT
-typename: IDENT
+typename: type
 
-mbrtype: IDENT
+mbrtype: type
 mbrname: IDENT
 
-vartype:IDENT
+vartype:type
 varname:IDENT
 
 fnname: IDENT
-rettype: IDENT
+rettype: IDENT // mutble proxies cannot be returned
+
+
 
 literal: STRING | LONGSTRING | FLOAT | INT
 

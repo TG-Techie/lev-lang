@@ -3,23 +3,32 @@
 #include "varad_macro.h"
 
 #include "cir_mbrof_macro.h"
+#include "cir_func_mthd_macro.h"
+#include "cir_struct_proxy_macro.h"
 
-// TODO: mkae rel calls for sct and cls call all the proper things
-// TODO: add _dec_stmt_def _asn_stmt_def _asnmbr_stmt_def
-// TODO: make syntax for setting mbr,  maby separate getmbr() to get( mbrof() )
-//  for asn(mbrof(value, name, type) works).
+// TODO: make proxy into mut, this way mutable struct methods need to use the
+//  mut(TypeName) macro. this also menas that while mut_StructType prxoies
+//  do need to be gerneated class proxies do not need to exist
+// it also means taht it give the language above more grandular controll!
+
+
 
 //tools
 //  clang -E inc_boot_trans1.c &> foo_out.c; clang-format foo_out.c > foo_out_fmt.c
 //  rm a.out; clang inc_boot_trans1.c; ./a.out
+
+/// as one:
+// clang -E compile_basic_levir.c > foo_out.c;
+// clang-format foo_out.c > foo_out_fmt.c;
+// rm a.out;
+// clang -Wno-unused-value compile_basic_levir.c; ./a.out
+
 
 
 
 //////// MAJOR CHAGNE caller is responcible for reference counting!
 //////// the callee is responcible for free-ing.
 ////////    ie gets, calls, etc, return with rc+1
-
-#define CMT(a) a
 
 typedef uint64_t RefCount;
 
@@ -43,20 +52,6 @@ getmbr: #this is a macro : getmbr_<name>() -> type(Member)
 
 // declarations
 
-
-
-#define fn(fnname, rettype, args, locals, frame)\
-    rettype fn_##fnname _c_args_from_##args { \
-        _dec_temps_from_##args \
-        _dec_dflt_from_##locals \
-        _dec_temps_from_##locals \
-        _paste_##frame\
-        fn_return_label:\
-        _rel_from_##args\
-        _rel_from_##locals\
-        return _return_tmp_;\
-    } \
-
 #define class(typename, members)\
     class_body_def(typename, members)\
     class_new_expr_def(typename, members)\
@@ -64,7 +59,6 @@ getmbr: #this is a macro : getmbr_<name>() -> type(Member)
     class_rel_expr_def(typename, members)\
     class_dec_deflt_def(typename, members)\
     class_ret_def(typename, members)\
-    class_expose_mbrs_def(typename, members)\
     class_content_ptr_def(typename, members)\
 
 
@@ -75,18 +69,37 @@ getmbr: #this is a macro : getmbr_<name>() -> type(Member)
     struct_rel_expr_def(typename, members)\
     struct_dec_deflt_def(typename, members)\
     struct_ret_def(typename, members)\
-    struct_expose_mbrs_def(typename, members)\
     struct_content_ptr_def(typename, members)\
+    struct_mut_proxy_def(typename, members)
+
+#define mutbl(type) \
+    mutble_proxy_##type
+
+#define self(expr, type) \
+    expr
+
+#define mutself(expr, type) \
+    proxy_##type(&(expr))
 
 // expressions
 #define get(subject, type)\
     get_##type(subject)
 
-#define call(fnname, args)\
-    fn_##fnname args
 
-#define new(type, content) \
-    new_##type( (content_##type) content)
+//fncall(some_fn_name, args())
+#define fncall(fnname, args)\
+    fn_##fnname (_unpack_##args)
+
+#define mthdcall(selftype, methodname, expr, args)\
+    mthd_##selftype##__##methodname ( &(expr), _unpack_##args)
+
+#define _unpack_args(...) __VA_ARGS__
+
+
+#define new(type, cntn) \
+    new_##type( (content_##type) _unpack_##cntn)
+
+#define _unpack_cntn(...) { __VA_ARGS__ }
 
 #define litrl(type, value) \
     litrl_##type(value)
@@ -95,11 +108,12 @@ getmbr: #this is a macro : getmbr_<name>() -> type(Member)
 // stamtements
 
 // var asn target
-#define var(name) \
+#define var(name, type) \
     var_##name
 
-#define comment(string) \
-    string;
+// usage: btw("comment", "comment", "etc")
+#define btw(...) \
+    (__VA_ARGS__);
 
 
 #define asn(asntarget, expr, type) \
@@ -110,24 +124,12 @@ getmbr: #this is a macro : getmbr_<name>() -> type(Member)
         rel_##type(prev_value); \
     }\
 
-// #define asnvar(varname, type, value) \
-//     tmp_asnvar_##varname = var_##varname; \
-//     var_##varname = value; \
-//     rel_##type(tmp_asnvar_##varname);\
-
-#define asnmbr(mbrname, mbrtype, varexpr, vartype, expr) \
-    {\
-        vartype asnmbr_temp = varexpr;\
-        rel_##mbrtype(expose_mbrs_##vartype(asnmbr_temp).mbr_##mbrname);\
-        content_ptr_##vartype(&asnmbr_temp)->mbr_##mbrname = expr;\
-    }\
-
-
 // turn expression into content ri_cpu_time_qos_user_interactiv
 // pass cntn_ptr into fn(cntn_ptr, &(cntn_ptr->mbr_name))
 
 #define ret(expr, type) \
-    type _return_tmp_ = expr; goto fn_return_label;
+    type _return_tmp_ = expr;\
+    goto _return_label_;
 
 
 #define brk break;
@@ -144,51 +146,20 @@ getmbr: #this is a macro : getmbr_<name>() -> type(Member)
 */
 
 // debug statments
-#define dropin(...) __VA_ARGS__
 #define dbg(...) __VA_ARGS__ ;
 #define print_refcount(subject, type)\
     printf("`" #subject "`'s ref count = %llu\n", subject->rc);
+#define rc(subject)\
+    { \
+        ("dbg(rc(",#subject,"))");\
+        if (subject == NULL) {\
+            printf("unable to get rc of `" #subject "`, not yet assigned\n");\
+        } else {\
+            printf("rc of `" #subject "`'s is %llu\n", subject->rc); \
+        }\
+    }\
 
 
-
-///// function macro specifics ///////
-
-#define _c_args_from_args(first, ...) ( \
-        _first_arg_to_c_##first \
-        VARAD_VARNT_MACRO(arg_to_c_, __VA_ARGS__) \
-    )
-#define VARNT_IMPL_arg_to_c_
-#define _first_arg_to_c_ void // for funcs that take no args
-#define _first_arg_to_c_arg(name, type) type var_##name
-#define VARNT_IMPL_arg_to_c_arg(name, type) , type var_##name
-
-#define _dec_temps_from_args(...)   _dec_temps_from_any(__VA_ARGS__)
-#define _dec_temps_from_locals(...) _dec_temps_from_any(__VA_ARGS__)
-#define _dec_temps_from_any(...)\
-    VARAD_VARNT_MACRO(arg_to_dec_tmp_, __VA_ARGS__)
-#define VARNT_IMPL_arg_to_dec_tmp_
-#define VARNT_IMPL_arg_to_dec_tmp_arg VARNT_IMPL_arg_to_dec_tmp_any
-#define VARNT_IMPL_arg_to_dec_tmp_lcl VARNT_IMPL_arg_to_dec_tmp_any
-#define VARNT_IMPL_arg_to_dec_tmp_any(name, type) \
-    type tmp_asnvar_##name; \
-    type tmp_mbrof_##name; \
-
-#define _dec_dflt_from_locals(...)\
-    VARAD_VARNT_MACRO(lcl_to_dec_deflt_, __VA_ARGS__)
-#define VARNT_IMPL_lcl_to_dec_deflt_
-#define VARNT_IMPL_lcl_to_dec_deflt_lcl(name, type) \
-    type var_##name = dec_dflt_##type();
-
-#define _rel_from_args(...)   _rel_from_any(__VA_ARGS__)
-#define _rel_from_locals(...) _rel_from_any(__VA_ARGS__)
-#define _rel_from_any(...)\
-    VARAD_VARNT_MACRO(rel_var_, __VA_ARGS__)
-#define VARNT_IMPL_rel_var_
-#define VARNT_IMPL_rel_var_arg VARNT_IMPL_rel_var_any
-#define VARNT_IMPL_rel_var_lcl VARNT_IMPL_rel_var_any
-#define VARNT_IMPL_rel_var_any(name, type) rel_##type(var_##name);
-
-#define _paste_frame(...) __VA_ARGS__
 
 ///// class and struct specifics /////////
 
@@ -211,15 +182,6 @@ getmbr: #this is a macro : getmbr_<name>() -> type(Member)
         }\
     *typename;
 
-
-// expose_mbrs_SomeType() takes an expression as it is only use in set and
-//  get members. this means that it, as a funciton, needs to rel the inputs
-#define class_expose_mbrs_def(typename, members)\
-    content_##typename expose_mbrs_##typename(typename selfexpr){\
-        rel_##typename(selfexpr);\
-        return selfexpr->content;\
-    }
-
 #define class_new_expr_def(typename, members)\
     typename new_##typename(content_##typename content) {\
         typename self = malloc(sizeof(struct typename));\
@@ -230,6 +192,9 @@ getmbr: #this is a macro : getmbr_<name>() -> type(Member)
 
 #define class_get_expr_def(typename, members)\
     typename get_##typename(typename self){\
+        if (self == NULL) { \
+            printf("local variable used before assignment\n"); *NULL;\
+        } \
         self->rc +=1;\
         return self;\
     }
@@ -261,6 +226,7 @@ getmbr: #this is a macro : getmbr_<name>() -> type(Member)
         return &(self->content);\
     }\
 
+
 #define copyblock_from_mbrs(...) {VARAD_VARNT_MACRO(copyblock_, __VA_ARGS__)}
 #define VARNT_IMPL_copyblock_
 #define VARNT_IMPL_copyblock_mbr(name, type) get_##type(self.mbr_##name),
@@ -275,18 +241,10 @@ getmbr: #this is a macro : getmbr_<name>() -> type(Member)
 
 
 #define struct_body_def(typename, members)\
-        typedef struct typename\
-            contentbody_from_##members\
-        typename;\
-        typedef typename content_##typename;\
-
-// expose_mbrs_SomeType() takes an expression as it is only use in set and
-//  get members. this means that it, as a funciton, needs to rel the inputs
-#define struct_expose_mbrs_def(typename, members)\
-    content_##typename expose_mbrs_##typename(typename selfexpr){\
-        rel_##typename(selfexpr);\
-        return selfexpr;\
-    }
+    typedef struct typename\
+        contentbody_from_##members\
+    typename;\
+    typedef typename content_##typename;\
 
 #define struct_new_expr_def(typename, members)\
     typename new_##typename(content_##typename content) {\
@@ -319,3 +277,11 @@ getmbr: #this is a macro : getmbr_<name>() -> type(Member)
     content_##typename* content_ptr_##typename(typename* self_ptr){\
         return (content_##typename*) self_ptr;\
     }
+
+
+// this function takes a reference
+#define struct_mut_proxy_def(typename, members)\
+     _mut_proxy_def(typename)\
+     mutble_proxy_##typename proxy_##typename(typename* self){\
+         return (mutble_proxy_##typename) self;\
+     }\
