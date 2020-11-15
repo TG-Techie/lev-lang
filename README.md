@@ -19,13 +19,14 @@ class(mod_main_Counter, mbrs(
     mbr(_count, uint32)
 ))
 
+// example of a function def
 fn(main, uint16, args(), 
     locals( lcl(x, uint16) ), // list all local variables
     frame( 
-        // x = 16;
+        // x = 0;
         asn( // =
             var(x, uint16), // x
-            litrl(uint16, 0), // 16
+            litrl(uint16, 0), // 0
             uint16
         )
         // return x;
